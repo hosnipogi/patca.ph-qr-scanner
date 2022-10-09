@@ -93,6 +93,7 @@ function App() {
 
   const handleScanCapture = async (id: string) => {
     try {
+      handleReset();
       const resp = await fetchData(id);
       handleSuccess("Success");
       setMember({ ...resp, id });
