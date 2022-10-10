@@ -36,11 +36,9 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
   const [attendanceDay2, setAttendanceDay2] = useState(member.isPresentDay2);
   const [attendanceDay3, setAttendanceDay3] = useState(member.isPresentDay3);
 
-  const [loadingStatus, setLoadingStatus] = useState({
-    updateAttendance: false,
-    updatePayment: false,
-    updateReceivedSouvenir: false,
-  });
+  const [loadingUpdateAttendance, setLoadingUpdateAttendance] = useState(false);
+  const [loadingUpdatePayment, setLoadingUpdatePayment] = useState(false);
+  const [loadingUpdateSouvenir, setLoadingUpdateSouvenir] = useState(false);
 
   const { api } = useApiContext();
 
@@ -48,7 +46,7 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
 
   const handleUpdateAttendance = async () => {
     try {
-      setLoadingStatus({ ...loadingStatus, updateAttendance: true });
+      setLoadingUpdateAttendance(true);
       const body = { id: member.id };
       if (!api) throw new Error("axios not instantiated");
       const { data, status } = await api.axios.post<{
@@ -76,19 +74,19 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
             break;
           }
         }
-        setLoadingStatus({ ...loadingStatus, updateAttendance: false });
+        setLoadingUpdateAttendance(false);
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
         onError(e.response?.data);
       }
-      setLoadingStatus({ ...loadingStatus, updateAttendance: false });
+      setLoadingUpdateAttendance(false);
     }
   };
 
   const handleUpdatePayment = async () => {
     try {
-      setLoadingStatus({ ...loadingStatus, updatePayment: true });
+      setLoadingUpdatePayment(true);
       const body = { id: member.id };
       if (!api) throw new Error("axios not instantiated");
 
@@ -100,22 +98,19 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
       onSuccess(data);
       if (status === 200) {
         setIsPaid(true);
-        setLoadingStatus({ ...loadingStatus, updatePayment: false });
+        setLoadingUpdatePayment(false);
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
         onError(e.response?.data);
       }
-      setLoadingStatus({ ...loadingStatus, updatePayment: false });
+      setLoadingUpdatePayment(false);
     }
   };
 
   const handleUpdateReceivedSouvenir = async () => {
     try {
-      setLoadingStatus({
-        ...loadingStatus,
-        updateReceivedSouvenir: true,
-      });
+      setLoadingUpdateSouvenir(true);
       const body = { id: member.id };
       if (!api) throw new Error("axios not instantiated");
       const { data, status } = await api.axios.post(
@@ -126,19 +121,13 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
       onSuccess(data);
       if (status === 200) {
         setReceivedSouvenir(true);
-        setLoadingStatus({
-          ...loadingStatus,
-          updateReceivedSouvenir: false,
-        });
+        setLoadingUpdateSouvenir(false);
       }
     } catch (e) {
       if (axios.isAxiosError(e)) {
         onError(e.response?.data);
       }
-      setLoadingStatus({
-        ...loadingStatus,
-        updateReceivedSouvenir: false,
-      });
+      setLoadingUpdateSouvenir(false);
     }
   };
 
@@ -204,14 +193,14 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
           <LoadingButton
             variant="outlined"
             onClick={handleUpdateAttendance}
-            loading={loadingStatus.updateAttendance}
+            loading={loadingUpdateAttendance}
           >
             Set Present
           </LoadingButton>
           <LoadingButton
             variant="outlined"
             onClick={handleUpdatePayment}
-            loading={loadingStatus.updatePayment}
+            loading={loadingUpdatePayment}
             disabled={isPaid}
           >
             Update Payment
@@ -219,7 +208,7 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
           <LoadingButton
             variant="outlined"
             onClick={handleUpdateReceivedSouvenir}
-            loading={loadingStatus.updateReceivedSouvenir}
+            loading={loadingUpdateSouvenir}
             disabled={receivedSouvenir}
           >
             Update Received Souvenir

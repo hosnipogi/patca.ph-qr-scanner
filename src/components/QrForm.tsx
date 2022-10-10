@@ -8,6 +8,7 @@ interface IQrForm {
 const QrForm = ({ onSubmit, clickAnywhereListenerEnable }: IQrForm) => {
   const [id, setId] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [disabled, setDisabled] = useState(false);
 
   useEffect(() => {
     const inp = inputRef.current;
@@ -31,6 +32,10 @@ const QrForm = ({ onSubmit, clickAnywhereListenerEnable }: IQrForm) => {
     e.preventDefault();
     onSubmit(id);
     setId("");
+    setTimeout(() => {
+      setDisabled(false);
+    }, 3000);
+    setDisabled(true);
   };
 
   return (
@@ -49,7 +54,7 @@ const QrForm = ({ onSubmit, clickAnywhereListenerEnable }: IQrForm) => {
 
       <Button
         type="submit"
-        disabled={!id}
+        disabled={!id || disabled}
         variant="contained"
         sx={{ ml: 2, height: 40 }}
       >
