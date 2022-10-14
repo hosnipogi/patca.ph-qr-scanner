@@ -6,3 +6,5 @@ export enum Endpoints {
   UPDATE_SOUVENIR = "onUpdateReceivedSouvenir",
   UPDATE_ATTENDANCE = "onUpdateAttendance",
 }
+
+export * from "./firebase";

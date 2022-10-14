@@ -50,6 +50,7 @@ const QrForm = ({ onSubmit, clickAnywhereListenerEnable }: IQrForm) => {
         size="small"
         sx={{ height: 40 }}
         value={id}
+        disabled={disabled}
       />
 
       <Button

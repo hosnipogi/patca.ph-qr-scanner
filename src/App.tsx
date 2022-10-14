@@ -17,10 +17,8 @@ import {
 } from "@mui/material";
 import type { IMember, QrMethodType } from "./types";
 import { List, Dialog, QrCamera, QrForm, Snackbar } from "./components";
-import { functionUrl, Endpoints } from "./config";
-import axiosApi from "utils/axios";
-import { useApiContext } from "providers/axios";
-import axios from "axios";
+import { functionSearchUser } from "./config";
+import { useUserContext } from "providers/auth";
 
 function App() {
   const [member, setMember] = useState<IMember | null>(null);
@@ -33,19 +31,23 @@ function App() {
   const [snackbarSeverity, setSnackbarSeverity] =
     useState<AlertProps["severity"]>("success");
 
-  const { api, handleSetApi } = useApiContext();
+  // const { api, handleSetApi } = useApiContext();
+  const { signInWithGoogle, signOut, user } = useUserContext();
 
   /************* USE EFFECT *************/
 
   useEffect(() => {
-    const auth = localStorage.getItem("auth");
-    if (!auth) {
-      setDialogIsOpen(true);
-      return;
+    let timeout: any;
+    if (!user) {
+      timeout = setTimeout(() => {
+        setDialogIsOpen(true);
+      }, 1500);
+    } else {
+      setDialogIsOpen(false);
     }
-    const ax = new axiosApi(auth);
-    handleSetApi(ax);
-  }, []);
+
+    return () => clearTimeout(timeout);
+  }, [user]);
 
   useEffect(() => {
     let timeout: any;
@@ -56,17 +58,6 @@ function App() {
     }
     return () => clearTimeout(timeout);
   }, [member]);
-
-  /************* SERVER AUTHENTICATION *************/
-
-  const onDialogSubmit = (val: string) => {
-    if (!val) return;
-    localStorage.setItem("auth", val);
-
-    const ax = new axiosApi(val);
-    handleSetApi(ax);
-    setDialogIsOpen(false);
-  };
 
   /************* SNACK BAR *************/
 
@@ -105,24 +96,15 @@ function App() {
       });
     } catch (e) {
       setIsLoading(false);
-      if (axios.isAxiosError(e)) {
-        const message = e.response?.data as string;
-        handleError(message);
-        if (message && message.toLocaleLowerCase().includes("invalid")) {
-          setDialogIsOpen(true);
-        }
+      if (e instanceof Error) {
+        handleError(e.message);
       }
     }
   };
 
   const fetchData = async (id: string) => {
-    if (!api) throw new Error("axios instance not defined");
-
     setIsLoading(true);
-    const { data } = await api.axios.get<IMember>(
-      `${functionUrl}/${Endpoints.SEARCH_USER}?id=${id}`
-    );
-
+    const { data } = await functionSearchUser(id);
     return data;
   };
 
@@ -167,7 +149,7 @@ function App() {
 
   return (
     <Container maxWidth={false} sx={{ bgcolor: "#ccc" }}>
-      <Dialog dialogIsOpen={dialogIsOpen} onDialogSubmit={onDialogSubmit} />
+      <Dialog dialogIsOpen={dialogIsOpen} />
       <Snackbar
         open={snackbarOpen}
         message={snackbarMessage}
@@ -180,18 +162,23 @@ function App() {
       >
         <Stack gap={4}>
           <Box textAlign="right">
-            <Button
-              onClick={() => {
-                localStorage.removeItem("auth");
-                handleReset();
-                handleSuccess("Session reset success");
-                setDialogIsOpen(true);
-              }}
-              variant="outlined"
-              sx={{ width: 140, fontSize: 12 }}
-            >
-              Reset Session
-            </Button>
+            {user ? (
+              <Button
+                onClick={signOut}
+                variant="outlined"
+                sx={{ minWidth: 140, fontSize: 12 }}
+              >
+                Signout google
+              </Button>
+            ) : (
+              <Button
+                onClick={signInWithGoogle}
+                variant="outlined"
+                sx={{ minWidth: 140, fontSize: 12 }}
+              >
+                Sign in with Google
+              </Button>
+            )}
           </Box>
           <Box textAlign="center">
             <img
@@ -200,48 +187,64 @@ function App() {
               style={{ maxWidth: 400, height: 180, objectFit: "contain" }}
             />
           </Box>
-          <Divider />
-          <Stack gap={2}>
-            <Typography variant="h5">
-              {new Date().toLocaleDateString()}
-            </Typography>
-            <Box>
-              <FormControl>
-                <FormLabel id="qrMethod">
-                  Select Method of QR Scanning
-                </FormLabel>
-                <RadioGroup
-                  aria-labelledby="qrMethod"
-                  name="qrMethod-group"
-                  value={qrMethod}
-                  onChange={handleSetQrMethod}
-                >
-                  <FormControlLabel
-                    value="scanner"
-                    control={<Radio />}
-                    label="Scanner"
-                  />
-                  <FormControlLabel
-                    value="webcam"
-                    control={<Radio />}
-                    label="Webcam"
-                  />
-                </RadioGroup>
-              </FormControl>
-            </Box>
-          </Stack>
-          {renderQrMethod(qrMethod)}
-          {member && (
-            <List
-              member={member}
-              onReset={handleReset}
-              onError={handleError}
-              onSuccess={handleSuccess}
-            />
-          )}
-          {isLoading && (
-            <Box sx={{ display: "flex" }}>
-              <CircularProgress />
+          {user ? (
+            <>
+              <Divider />
+              <Stack gap={2}>
+                <Box>
+                  <Typography fontSize={16}>
+                    Logged in:{" "}
+                    {user ? <>{user?.name}</> : <CircularProgress size={12} />}
+                  </Typography>
+                  <Typography fontSize={16}>
+                    {new Date().toLocaleDateString()}
+                  </Typography>
+                </Box>
+                <Box>
+                  <FormControl>
+                    <FormLabel id="qrMethod">
+                      Select Method of QR Scanning
+                    </FormLabel>
+                    <RadioGroup
+                      aria-labelledby="qrMethod"
+                      name="qrMethod-group"
+                      value={qrMethod}
+                      onChange={handleSetQrMethod}
+                    >
+                      <FormControlLabel
+                        value="scanner"
+                        control={<Radio />}
+                        label="Scanner"
+                      />
+                      <FormControlLabel
+                        value="webcam"
+                        control={<Radio />}
+                        label="Webcam"
+                      />
+                    </RadioGroup>
+                  </FormControl>
+                </Box>
+              </Stack>
+              {renderQrMethod(qrMethod)}
+              {member && (
+                <List
+                  member={member}
+                  onReset={handleReset}
+                  onError={handleError}
+                  onSuccess={handleSuccess}
+                />
+              )}
+              {isLoading && (
+                <Box sx={{ display: "flex" }}>
+                  <CircularProgress />
+                </Box>
+              )}
+            </>
+          ) : (
+            <Box width="100%">
+              <Typography textAlign="center">
+                Please sign in to continue.
+              </Typography>
             </Box>
           )}
         </Stack>

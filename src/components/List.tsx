@@ -11,11 +11,14 @@ import {
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { IMember } from "../types/";
-import { Endpoints, functionUrl } from "../config";
 
 import styled from "@emotion/styled";
-import { useApiContext } from "providers/axios";
-import axios from "axios";
+
+import {
+  functionUpdateAttendance,
+  functionUpdatePaymentStatus,
+  functionUpdateReceivedSouvenir,
+} from "../config";
 
 interface IList {
   member: IMember;
@@ -40,45 +43,39 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
   const [loadingUpdatePayment, setLoadingUpdatePayment] = useState(false);
   const [loadingUpdateSouvenir, setLoadingUpdateSouvenir] = useState(false);
 
-  const { api } = useApiContext();
+  // const { api } = useApiContext();
 
   /***************** API ****************/
 
   const handleUpdateAttendance = async () => {
     try {
       setLoadingUpdateAttendance(true);
-      const body = { id: member.id };
-      if (!api) throw new Error("axios not instantiated");
-      const { data, status } = await api.axios.post<{
-        message: string;
-        dayNum: number;
-      }>(`${functionUrl}/${Endpoints.UPDATE_ATTENDANCE}`, body);
+
+      const { data } = await functionUpdateAttendance(member.id);
 
       onSuccess(data.message);
-      if (status === 200) {
-        console.log({ dayNum: data.dayNum });
-        switch (data.dayNum) {
-          case 1: {
-            setAttendanceDay1(true);
-            break;
-          }
-          case 2: {
-            setAttendanceDay2(true);
-            break;
-          }
-          case 3: {
-            setAttendanceDay3(true);
-            break;
-          }
-          default: {
-            break;
-          }
+      console.log({ dayNum: data.dayNum });
+      switch (data.dayNum) {
+        case 1: {
+          setAttendanceDay1(true);
+          break;
         }
-        setLoadingUpdateAttendance(false);
+        case 2: {
+          setAttendanceDay2(true);
+          break;
+        }
+        case 3: {
+          setAttendanceDay3(true);
+          break;
+        }
+        default: {
+          break;
+        }
       }
+      setLoadingUpdateAttendance(false);
     } catch (e) {
-      if (axios.isAxiosError(e)) {
-        onError(e.response?.data);
+      if (e instanceof Error) {
+        onError(e.message);
       }
       setLoadingUpdateAttendance(false);
     }
@@ -87,22 +84,14 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
   const handleUpdatePayment = async () => {
     try {
       setLoadingUpdatePayment(true);
-      const body = { id: member.id };
-      if (!api) throw new Error("axios not instantiated");
-
-      const { data, status } = await api.axios.post(
-        `${functionUrl}/${Endpoints.UPDATE_PAYMENT}`,
-        body
-      );
+      const { data } = await functionUpdatePaymentStatus(member.id);
 
       onSuccess(data);
-      if (status === 200) {
-        setIsPaid(true);
-        setLoadingUpdatePayment(false);
-      }
+      setIsPaid(true);
+      setLoadingUpdatePayment(false);
     } catch (e) {
-      if (axios.isAxiosError(e)) {
-        onError(e.response?.data);
+      if (e instanceof Error) {
+        onError(e.message);
       }
       setLoadingUpdatePayment(false);
     }
@@ -111,21 +100,15 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
   const handleUpdateReceivedSouvenir = async () => {
     try {
       setLoadingUpdateSouvenir(true);
-      const body = { id: member.id };
-      if (!api) throw new Error("axios not instantiated");
-      const { data, status } = await api.axios.post(
-        `${functionUrl}/${Endpoints.UPDATE_SOUVENIR}`,
-        body
-      );
+
+      const { data } = await functionUpdateReceivedSouvenir(member.id);
 
       onSuccess(data);
-      if (status === 200) {
-        setReceivedSouvenir(true);
-        setLoadingUpdateSouvenir(false);
-      }
+      setReceivedSouvenir(true);
+      setLoadingUpdateSouvenir(false);
     } catch (e) {
-      if (axios.isAxiosError(e)) {
-        onError(e.response?.data);
+      if (e instanceof Error) {
+        onError(e.message);
       }
       setLoadingUpdateSouvenir(false);
     }
