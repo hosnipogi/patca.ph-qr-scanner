@@ -27,3 +27,13 @@ export interface IMember {
   isPresentDay2: boolean;
   isPresentDay3: boolean;
 }
+
+export interface IPatcaGuest {
+  d0: string;
+  d1: string;
+  d2: string;
+  d3: string;
+  id: string;
+  name: string;
+  wiresign: string;
+}

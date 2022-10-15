@@ -19,15 +19,15 @@ import {
   functionUpdatePaymentStatus,
   functionUpdateReceivedSouvenir,
 } from "../config";
+import { useNotificationsContext } from "providers/notifications";
 
 interface IList {
   member: IMember;
   onReset: () => void;
-  onError: (message: string) => void;
-  onSuccess: (message: string) => void;
 }
 
-const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
+const ListComponent = ({ member, onReset }: IList) => {
+  const { handleError, handleSuccess } = useNotificationsContext();
   const [isPaid, setIsPaid] = useState(
     member.isPaid || member.methodOfPayment !== "Pay Later"
   );
@@ -43,8 +43,6 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
   const [loadingUpdatePayment, setLoadingUpdatePayment] = useState(false);
   const [loadingUpdateSouvenir, setLoadingUpdateSouvenir] = useState(false);
 
-  // const { api } = useApiContext();
-
   /***************** API ****************/
 
   const handleUpdateAttendance = async () => {
@@ -53,7 +51,7 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
 
       const { data } = await functionUpdateAttendance(member.id);
 
-      onSuccess(data.message);
+      handleSuccess(data.message);
       console.log({ dayNum: data.dayNum });
       switch (data.dayNum) {
         case 1: {
@@ -75,7 +73,7 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
       setLoadingUpdateAttendance(false);
     } catch (e) {
       if (e instanceof Error) {
-        onError(e.message);
+        handleError(e.message);
       }
       setLoadingUpdateAttendance(false);
     }
@@ -86,12 +84,12 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
       setLoadingUpdatePayment(true);
       const { data } = await functionUpdatePaymentStatus(member.id);
 
-      onSuccess(data);
+      handleSuccess(data);
       setIsPaid(true);
       setLoadingUpdatePayment(false);
     } catch (e) {
       if (e instanceof Error) {
-        onError(e.message);
+        handleError(e.message);
       }
       setLoadingUpdatePayment(false);
     }
@@ -103,12 +101,12 @@ const ListComponent = ({ member, onReset, onError, onSuccess }: IList) => {
 
       const { data } = await functionUpdateReceivedSouvenir(member.id);
 
-      onSuccess(data);
+      handleSuccess(data);
       setReceivedSouvenir(true);
       setLoadingUpdateSouvenir(false);
     } catch (e) {
       if (e instanceof Error) {
-        onError(e.message);
+        handleError(e.message);
       }
       setLoadingUpdateSouvenir(false);
     }

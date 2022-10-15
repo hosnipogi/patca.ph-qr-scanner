@@ -1,38 +1,29 @@
 import * as React from "react";
 import Snackbar from "@mui/material/Snackbar";
 import { Alert, AlertProps } from "@mui/material";
+import { useNotificationsContext } from "providers/notifications";
 
 interface ISnackbar {
   open: boolean;
   message: string;
   severity: AlertProps["severity"];
-  handleSetOpen: (bool: boolean) => void;
 }
-export default function SimpleSnackbar({
-  open,
-  message,
-  handleSetOpen,
-  severity,
-}: ISnackbar) {
+export default function SimpleSnackbar({ open, message, severity }: ISnackbar) {
+  const { handleSetSnackbarOpen } = useNotificationsContext();
   const handleClose = (
     event: React.SyntheticEvent | Event,
     reason?: string
   ) => {
-    // if (reason === "clickaway") {
-    //   handleSetOpen(false);
-    //   return;
-    // }
-
-    handleSetOpen(false);
+    handleSetSnackbarOpen(false);
   };
 
   return (
     <Snackbar
       open={open}
-      autoHideDuration={6000}
+      autoHideDuration={5000}
       onClose={handleClose}
-      anchorOrigin={{ horizontal: "left", vertical: "top" }}
-      sx={{ paddingLeft: 2 }}
+      anchorOrigin={{ horizontal: "center", vertical: "top" }}
+      sx={{ paddingLeft: 2, height: "100%" }}
     >
       <Alert onClose={handleClose} severity={severity}>
         {message}

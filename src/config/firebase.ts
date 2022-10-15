@@ -5,7 +5,7 @@ import {
   connectFunctionsEmulator,
 } from "firebase/functions";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
-import { IMember } from "types";
+import { IMember, IPatcaGuest } from "types";
 
 const projectId = process.env.REACT_APP_PROJECT_ID;
 const apiKey = process.env.REACT_APP_API_KEY;
@@ -33,6 +33,8 @@ if (process.env.NODE_ENV === "development") {
   connectFunctionsEmulator(functions, "localhost", 5001);
 }
 
+/******************** IFATCA FUNCTIONS *********************/
+
 const functionSearchUser = httpsCallable<string, IMember>(
   functions,
   "onSearchUser"
@@ -53,10 +55,24 @@ const functionUpdateReceivedSouvenir = httpsCallable<string, string>(
   "onUpdateReceivedSouvenir"
 );
 
+/******************** PATCA GUEST FUNCTIONS *********************/
+
+const functionPatcaSearchUser = httpsCallable<string, IPatcaGuest>(
+  functions,
+  "onSearchPatcaUser"
+);
+
+const functionPatcaUpdateAttendance = httpsCallable<
+  string,
+  { message: number; dayNum: number }
+>(functions, "onUpdatePatcaAttendance");
+
 export {
   auth,
   functionSearchUser,
   functionUpdateAttendance,
   functionUpdatePaymentStatus,
   functionUpdateReceivedSouvenir,
+  functionPatcaSearchUser,
+  functionPatcaUpdateAttendance,
 };
