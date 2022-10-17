@@ -25,7 +25,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const functions = getFunctions(app);
+const functions = getFunctions(app, "asia-southeast2");
 
 if (process.env.NODE_ENV === "development") {
   console.log("Development");
