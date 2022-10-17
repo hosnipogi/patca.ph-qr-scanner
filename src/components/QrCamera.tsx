@@ -95,8 +95,8 @@ const useQrScanner = ({ onScan, isUnmounting }: IQrScanner) => {
       <Box
         sx={{
           bgcolor: "#ccc",
-          width: 600,
-          height: 400,
+          maxWidth: 600,
+          maxHeight: 400,
           mx: "auto",
         }}
       >

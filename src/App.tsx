@@ -50,11 +50,11 @@ const Layout = () => {
               </Button>
             )}
           </Box>
-          <Box textAlign="center">
+          <Box textAlign="center" width={"100%"} height={180}>
             <img
               src={logo}
               alt="logo"
-              style={{ maxWidth: 400, height: 180, objectFit: "contain" }}
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </Box>
 
