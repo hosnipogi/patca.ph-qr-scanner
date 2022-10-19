@@ -4,12 +4,14 @@ import { QrMethod, List } from "components";
 import { IMember } from "types";
 import { functionSearchUser } from "config";
 import { useNotificationsContext } from "providers/notifications";
+import AutoSetPresentToggle from "components/AutoSetPresentToggle";
 
 const Ifatca = () => {
   const { handleSuccess, handleError } = useNotificationsContext();
 
   const [member, setMember] = useState<IMember | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [autoSetPresent, setAutoSetPresent] = useState(false);
 
   useEffect(() => {
     let timeout: any;
@@ -51,10 +53,25 @@ const Ifatca = () => {
     setMember(null);
   };
 
+  const handleAutoSetPresentToggle = () => {
+    setAutoSetPresent(!autoSetPresent);
+    console.log(autoSetPresent);
+  };
+
   return (
     <>
+      <AutoSetPresentToggle
+        onToggle={handleAutoSetPresentToggle}
+        isToggled={autoSetPresent}
+      />
       <QrMethod onReset={handleReset} onScanCapture={handleScanCapture} />
-      {member && <List member={member} onReset={handleReset} />}
+      {member && (
+        <List
+          member={member}
+          onReset={handleReset}
+          autoSetPresent={autoSetPresent}
+        />
+      )}
       {isLoading && (
         <Box sx={{ display: "flex" }}>
           <CircularProgress />

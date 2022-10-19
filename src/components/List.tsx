@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -20,13 +20,15 @@ import {
   functionUpdateReceivedSouvenir,
 } from "../config";
 import { useNotificationsContext } from "providers/notifications";
+import AutoSetPresentToggle from "./AutoSetPresentToggle";
 
 interface IList {
   member: IMember;
   onReset: () => void;
+  autoSetPresent: boolean;
 }
 
-const ListComponent = ({ member, onReset }: IList) => {
+const ListComponent = ({ member, onReset, autoSetPresent }: IList) => {
   const { handleError, handleSuccess } = useNotificationsContext();
   const [isPaid, setIsPaid] = useState(
     member.isPaid || member.methodOfPayment !== "Pay Later"
@@ -42,6 +44,12 @@ const ListComponent = ({ member, onReset }: IList) => {
   const [loadingUpdateAttendance, setLoadingUpdateAttendance] = useState(false);
   const [loadingUpdatePayment, setLoadingUpdatePayment] = useState(false);
   const [loadingUpdateSouvenir, setLoadingUpdateSouvenir] = useState(false);
+
+  useEffect(() => {
+    if (autoSetPresent) {
+      handleUpdateAttendance();
+    }
+  }, [autoSetPresent]);
 
   /***************** API ****************/
 

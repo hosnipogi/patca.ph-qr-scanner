@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -20,12 +20,19 @@ import { useNotificationsContext } from "providers/notifications";
 interface IList {
   member: IPatcaGuest;
   onReset: () => void;
+  autoSetPresent: boolean;
 }
 
-const ListComponent = ({ member, onReset }: IList) => {
+const ListComponent = ({ member, onReset, autoSetPresent }: IList) => {
   const { handleError, handleSuccess } = useNotificationsContext();
 
   const [loadingUpdateAttendance, setLoadingUpdateAttendance] = useState(false);
+
+  useEffect(() => {
+    if (autoSetPresent) {
+      handleUpdateAttendance();
+    }
+  }, [autoSetPresent]);
 
   /***************** API ****************/
 
